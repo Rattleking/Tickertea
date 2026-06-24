@@ -1,0 +1,37 @@
+/* Tickertea design tokens + base reset. Instrument-console palette (dark teal-ink). */
+:root {
+  --ground: #0E1417;
+  --surface: #141E20;
+  --surface-2: #1A2528;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --text: #E7EDEC;
+  --muted: #8FA3A0;
+  --faint: #5E716E;
+  --accent: #F4B740;     /* signal amber — descriptive notability */
+  --accent-2: #56C6C2;   /* cyan — interactive / selected, sparing */
+  --radius: 4px;
+  --mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(86, 198, 194, 0.05), transparent 60%),
+    var(--ground);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+a { color: var(--accent-2); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }

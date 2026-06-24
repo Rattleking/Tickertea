@@ -1,0 +1,136 @@
+.card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1.5rem;
+  padding: 0.95rem 1.05rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--line-strong);
+  border-radius: var(--radius);
+  transition: border-color 0.15s, background 0.15s;
+}
+.card:hover {
+  border-color: var(--line-strong);
+  border-left-color: var(--accent-2);
+  background: var(--surface-2);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+.ticker {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+}
+.coname {
+  font-size: 0.78rem;
+  color: var(--faint);
+}
+.chip {
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line-strong);
+  border-radius: 100px;
+  padding: 0.18rem 0.55rem;
+  display: inline-flex;
+  align-items: center;
+}
+.cdot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+}
+.dir {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.foot {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--faint);
+  display: flex;
+  gap: 0.9rem;
+}
+.status { text-transform: uppercase; letter-spacing: 0.08em; }
+
+.score {
+  text-align: right;
+  min-width: 150px;
+  align-self: center;
+}
+.compositeLabel {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-bottom: 0.45rem;
+}
+.composite {
+  font-family: var(--mono);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.meters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  margin-top: 0.6rem;
+}
+.meter {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  align-items: center;
+  gap: 0.45rem;
+}
+.mk {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--faint);
+}
+.bar {
+  height: 4px;
+  border-radius: 3px;
+  background: var(--line-strong);
+  overflow: hidden;
+}
+.bar > span {
+  display: block;
+  height: 100%;
+  background: var(--muted);
+  border-radius: 3px;
+}
+
+@media (max-width: 640px) {
+  .card { grid-template-columns: 1fr; gap: 0.8rem; }
+  .score { text-align: left; min-width: 0; }
+  .meters { max-width: 220px; }
+}

@@ -1,0 +1,29 @@
+[project]
+name = "tickertea-workers"
+version = "0.1.0"
+description = "Tickertea ingestion + NLP + scoring workers"
+requires-python = ">=3.12"
+dependencies = [
+  "psycopg[binary]>=3.2",
+  "redis>=5.0",
+  "boto3>=1.34",          # S3-compatible object storage
+  "httpx>=0.27",          # connectors
+  "pydantic>=2.7",
+  "numpy>=1.26",          # scoring statistics
+  "anthropic>=0.39",      # Claude API
+  "openai>=1.40",
+  "typer>=0.12",          # CLI
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.5", "mypy>=1.10"]
+
+[project.scripts]
+tickertea = "tickertea.cli:app"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"

@@ -1,0 +1,85 @@
+.rail {
+  border-right: 1px solid var(--line);
+  padding: 1.25rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  overflow-y: auto;
+  transition: opacity 0.15s;
+}
+.rail[data-pending] { opacity: 0.55; }
+
+.group { display: flex; flex-direction: column; gap: 0.7rem; }
+
+.label {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.head { display: flex; align-items: baseline; gap: 0.5rem; }
+.readout { font-family: var(--mono); font-size: 0.78rem; color: var(--accent); margin-left: auto; }
+.hint { margin: 0; font-size: 0.7rem; color: var(--faint); }
+
+.rail input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent) var(--fill, 0%), var(--line-strong) var(--fill, 0%));
+  outline: none;
+}
+.rail input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--ground);
+}
+.rail input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--ground);
+}
+
+.cats { display: flex; flex-direction: column; gap: 0.15rem; }
+.cat {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  padding: 0.4rem 0.45rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+}
+.cat:hover { background: var(--surface); color: var(--text); }
+.cat[aria-pressed="true"] { background: var(--surface-2); color: var(--text); }
+.catDot { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+
+.seg { display: flex; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.seg button {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  border-right: 1px solid var(--line);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 0.45rem 0;
+  cursor: pointer;
+}
+.seg button:last-child { border-right: 0; }
+.seg button[aria-pressed="true"] { background: var(--surface-2); color: var(--text); }
