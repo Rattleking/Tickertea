@@ -22,6 +22,11 @@ export default function DashboardLoading() {
             <span className={styles.feedTitle}>SIGNAL FEED</span>
             <span className={styles.feedMeta}>loading…</span>
           </div>
+          <div className={styles.feed}>
+            <div className={styles.skeleton} />
+            <div className={styles.skeleton} />
+            <div className={styles.skeleton} />
+          </div>
         </main>
       </div>
     </div>

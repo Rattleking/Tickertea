@@ -3,12 +3,13 @@ import type { Signal } from "@tickertea/contracts";
 
 /**
  * Server-side fetch of the LIVE signal feed from GET /api/v1/signals.
- * No mock data — this calls the real route handler, which reads from Neon under RLS.
+ * Calls the real route handler (reads from Neon under RLS). Never throws — returns a
+ * typed result so the page can render live data, an auth notice, or a graceful fallback.
  *
  * Auth: the API derives the tenant from a session. Until real auth is wired, we forward
- * the dev session headers the stub expects (see src/lib/auth/session.ts). The tenant/user
- * identity comes from env with the seeded demo workspace as the default — this is an auth
- * shim, not data; every signal returned is real.
+ * the dev session headers the stub expects (see src/lib/auth/session.ts), sourced from env
+ * with the seeded demo workspace as default. That is an auth shim, not data — live signals
+ * are always real.
  */
 const DEV_TENANT_ID = process.env.TICKERTEA_DEV_TENANT_ID ?? "11111111-1111-1111-1111-111111111111";
 const DEV_USER_ID = process.env.TICKERTEA_DEV_USER_ID ?? "22222222-2222-2222-2222-222222222222";
@@ -20,10 +21,9 @@ export interface SignalFeedFilters {
   limit?: number;
 }
 
-export interface SignalFeed {
-  data: Signal[];
-  next_cursor: string | null;
-}
+export type SignalFeedResult =
+  | { ok: true; data: Signal[]; next_cursor: string | null }
+  | { ok: false; status: number; message: string };
 
 function buildQuery(filters: SignalFeedFilters): string {
   const p = new URLSearchParams();
@@ -41,15 +41,30 @@ async function baseUrl(): Promise<string> {
   return `${proto}://${host}`;
 }
 
-export async function fetchSignalFeed(filters: SignalFeedFilters): Promise<SignalFeed> {
-  const url = `${await baseUrl()}/api/v1/signals?${buildQuery(filters)}`;
-  const res = await fetch(url, {
-    headers: { "x-dev-tenant-id": DEV_TENANT_ID, "x-dev-user-id": DEV_USER_ID },
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`signals API ${res.status}: ${body.slice(0, 200)}`);
+/** Coerce an unknown API body into a safe Signal[] — tolerant of partial/missing fields. */
+function coerceSignals(body: unknown): Signal[] {
+  const rows = (body as { data?: unknown })?.data;
+  if (!Array.isArray(rows)) return [];
+  return rows.filter((r): r is Signal => !!r && typeof r === "object" && "id" in r);
+}
+
+export async function fetchSignalFeed(filters: SignalFeedFilters): Promise<SignalFeedResult> {
+  let res: Response;
+  try {
+    res = await fetch(`${await baseUrl()}/api/v1/signals?${buildQuery(filters)}`, {
+      headers: { "x-dev-tenant-id": DEV_TENANT_ID, "x-dev-user-id": DEV_USER_ID },
+      cache: "no-store",
+    });
+  } catch (e) {
+    return { ok: false, status: 0, message: e instanceof Error ? e.message : "Network error" };
   }
-  return (await res.json()) as SignalFeed;
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    return { ok: false, status: res.status, message: text.slice(0, 200) || res.statusText };
+  }
+
+  const json = await res.json().catch(() => null);
+  const next = (json as { next_cursor?: string | null })?.next_cursor ?? null;
+  return { ok: true, data: coerceSignals(json), next_cursor: next };
 }

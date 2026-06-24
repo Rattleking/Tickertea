@@ -78,6 +78,33 @@
   margin-top: 0.9rem;
 }
 
+.banner {
+  margin-top: 0.9rem;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  background: rgba(244, 183, 64, 0.06);
+  color: var(--text);
+  font-size: 0.8rem;
+}
+
+.skeleton {
+  height: 96px;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s infinite linear;
+}
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}
+
 .panel {
   margin-top: 1.5rem;
   padding: 2rem 1.25rem;
@@ -94,6 +121,18 @@
   margin: 0.6rem 0 0;
 }
 .panelHint { font-size: 0.78rem; color: var(--muted); margin: 0.5rem 0 0; }
+
+.retry {
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 0.45rem 1.1rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.retry:hover { border-color: var(--accent-2); }
 
 .footer {
   font-family: var(--mono);
