@@ -5,6 +5,7 @@ from __future__ import annotations
 
 from tickertea.detect.base import Detector
 from tickertea.detect.detectors.hiring_spike import HiringSpikeDetector
+from tickertea.detect.detectors.management_change import ManagementChangeDetector
 
 _DETECTORS: dict[str, Detector] = {}
 
@@ -23,5 +24,6 @@ def get_detector(category_slug: str) -> Detector:
 
 # --- Built-in registrations ---------------------------------------------------------
 register(HiringSpikeDetector())
-# TODO: mean_reversion, management_change, capex_expansion, subsidiary_creation,
+register(ManagementChangeDetector())
+# TODO: mean_reversion, capex_expansion, subsidiary_creation,
 #       narrative_shift, news_event, insider_activity, institutional_flow

@@ -69,9 +69,13 @@ class ScoringEngine:
 
     # --- component scorers (replaceable per category) -------------------------------
     def _magnitude(self, c: CandidateSignal) -> float:
-        """How large vs the company's own baseline. Default: squash a z-score."""
+        """How large the change is. Statistical detectors supply a z-score (squashed:
+        5σ -> ~1.0); event-driven detectors (e.g. a disclosed CXO change, which has no
+        baseline) supply an explicit `magnitude` in [0,1] reflecting materiality."""
+        if "magnitude" in c.features:
+            return _clip01(float(c.features["magnitude"]))
         z = abs(float(c.features.get("zscore", 0.0)))
-        return _clip01(z / 5.0)  # 5σ -> ~1.0
+        return _clip01(z / 5.0)
 
     def _confidence(self, c: CandidateSignal) -> float:
         """Evidence strength & corroboration. More independent evidence -> higher."""

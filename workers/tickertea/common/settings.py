@@ -51,6 +51,8 @@ def _require(key: str) -> str:
 class Settings:
     database_admin_url: str
     db_pool_max: int
+    raw_store_backend: str  # "s3" (prod / MinIO) or "file" (local dev, no object store)
+    raw_store_dir: str      # filesystem root when raw_store_backend == "file"
     s3_endpoint: str
     s3_bucket: str
     s3_access_key: str
@@ -66,9 +68,14 @@ class Settings:
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     _load_env_files()
+    # Raw-payload store: S3/MinIO is the production traceability anchor, but this machine
+    # has no object store running. Default to a local filesystem backend so the write path
+    # works end-to-end out of the box; production sets RAW_STORE_BACKEND=s3.
     return Settings(
         database_admin_url=_require("DATABASE_ADMIN_URL"),
         db_pool_max=int(os.environ.get("DB_POOL_MAX", "10")),
+        raw_store_backend=os.environ.get("RAW_STORE_BACKEND", "file").lower(),
+        raw_store_dir=os.environ.get("RAW_STORE_DIR", str(_REPO_ROOT / ".rawstore")),
         s3_endpoint=os.environ.get("S3_ENDPOINT", "http://localhost:9000"),
         s3_bucket=os.environ.get("S3_BUCKET", "tickertea-raw"),
         s3_access_key=os.environ.get("S3_ACCESS_KEY", "tickertea"),

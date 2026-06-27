@@ -29,3 +29,6 @@ __pycache__/
 # Generated
 packages/contracts/openapi.json
 coverage/
+
+# Local raw-payload store (file rawstore backend; prod uses S3)
+.rawstore/

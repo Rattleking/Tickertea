@@ -1,22 +1,52 @@
-"""Immutable raw-payload storage on S3-compatible object storage (MinIO in dev).
+"""Immutable raw-payload storage.
 
-Every connector's RawItem is written here BEFORE normalization, and the returned
-`s3://…` URI is stored on ingest_event.raw_uri. This is the traceability anchor: a
-signal's evidence chain ends at the exact bytes a source returned. Raw objects are
-never mutated or deleted.
+Every connector's RawItem is written here BEFORE normalization, and the returned URI is
+stored on ingest_event.raw_uri. This is the traceability anchor: a signal's evidence chain
+ends at the exact bytes a source returned. Raw objects are never mutated or deleted.
+
+Two backends, selected by RAW_STORE_BACKEND:
+  - "s3"   : S3-compatible object storage (MinIO in dev, S3/R2 in prod) -> s3://… URIs.
+  - "file" : local filesystem (default; this machine has no object store) -> file://… URIs.
+
+Both compute the SAME partitioned key (`<source_key>/<YYYY/MM/DD>/<external_id>`) so a
+deployment can lift-and-shift the local tree into a bucket without rewriting raw_uris'
+path component.
 """
 from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
-import boto3
-from botocore.client import Config
-from botocore.exceptions import ClientError
-
 from tickertea.common.settings import get_settings
+
+
+def _object_key(source_key: str, external_id: str) -> str:
+    """Partition by source and ingest date for cheap lifecycle/auditing."""
+    day = datetime.now(timezone.utc).strftime("%Y/%m/%d")
+    return f"{source_key}/{day}/{_safe(external_id)}"
+
+
+class FileRawStore:
+    """Filesystem backend: writes immutable payloads under a local root, returns file:// URIs."""
+
+    def __init__(self, root: str) -> None:
+        self._root = Path(root)
+
+    def put(
+        self,
+        source_key: str,
+        external_id: str,
+        body: bytes | str | dict[str, Any],
+        content_type: str = "application/json",
+    ) -> str:
+        key = _object_key(source_key, external_id)
+        path = self._root / key
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(_to_bytes(body, content_type))
+        return path.resolve().as_uri()  # file:///…
 
 
 class RawStore:
@@ -28,6 +58,8 @@ class RawStore:
     def _ensure_bucket(self) -> None:
         if self._ensured:
             return
+        from botocore.exceptions import ClientError
+
         try:
             self._client.head_bucket(Bucket=self._bucket)
         except ClientError:
@@ -48,8 +80,7 @@ class RawStore:
         """
         self._ensure_bucket()
         data = _to_bytes(body, content_type)
-        day = datetime.now(timezone.utc).strftime("%Y/%m/%d")
-        key = f"{source_key}/{day}/{_safe(external_id)}"
+        key = _object_key(source_key, external_id)
         self._client.put_object(
             Bucket=self._bucket, Key=key, Body=data, ContentType=content_type
         )
@@ -69,8 +100,16 @@ def _safe(external_id: str) -> str:
 
 
 @lru_cache(maxsize=1)
-def get_rawstore() -> RawStore:
+def get_rawstore() -> RawStore | FileRawStore:
     s = get_settings()
+    if s.raw_store_backend == "file":
+        return FileRawStore(s.raw_store_dir)
+
+    # boto3 is only needed for the S3 backend; import lazily so local-dev (file backend)
+    # doesn't depend on it being installed/configured.
+    import boto3
+    from botocore.client import Config
+
     client = boto3.client(
         "s3",
         endpoint_url=s.s3_endpoint,
